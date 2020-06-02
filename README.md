@@ -24,7 +24,7 @@ The input sites are provided as the file:
 ./sites.csv
 ```
 
-![sites](https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true)
+![sites](https://github.com/shengsheng555/landsat-cls/blob/master/figure/sites.jpg?raw=true)
 
 
 
@@ -50,7 +50,7 @@ The extracted data are saved as a numpy array with datatype "uint16" and shape (
 
 Below is an example. First 8 images are from Landsat-8. The last image is from NLCD.
 
-![example](https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true)
+![example](https://github.com/shengsheng555/landsat-cls/blob/master/figure/example.png?raw=true)
 
 
 ### Train the CNN
