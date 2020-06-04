@@ -18,7 +18,7 @@ Tensorflow >=2.0
 
 ### Input Sites
 
-The input sites are provided as the file: 
+The input sites are provided in the file: 
 
 ```bash
 ./sites.csv
