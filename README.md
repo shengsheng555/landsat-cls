@@ -16,12 +16,12 @@ Tensorflow >=2.0
 [Shapely](https://github.com/Toblerity/Shapely/)
 
 
-### Input Sites
+### Sites for Training
 
-The input sites are provided in the file: 
+The input training sites are provided in the file: 
 
 ```bash
-./sites.csv
+./sites_train.csv
 ```
 
 ![sites](https://github.com/shengsheng555/landsat-cls/blob/master/figure/sites.jpg?raw=true)
