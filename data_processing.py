@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 NLCD_PATH = './NLCD/'
 LANDSAT_PATH = './Landsat8data/'
 L8_NLCD_PATH = './L8_NLCD/'
-for PATH in [NLCD_PATH, LANDSAT_PATH, L8_NLCD_PATH, gdrive_dir]:
+for PATH in [NLCD_PATH, LANDSAT_PATH, L8_NLCD_PATH]:
     os.makedirs(PATH, exist_ok=True)
 
 L8_NLCD_file = os.path.join(L8_NLCD_PATH,'L8_NLCD_Site_ID_{}_LARGE.TIF')
