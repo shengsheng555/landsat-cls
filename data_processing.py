@@ -32,7 +32,7 @@ image_height = 3840
 res = 30    
 
 # get input sites, coordinates in LatLong format 
-sites = pd.read_csv('./sites.csv', header=0)
+sites = pd.read_csv('./sites_train.csv', header=0)
 
 # Download and unzip NLCD dataset
 # This may take more than 5 minutes
@@ -347,8 +347,7 @@ for i in range(arr.shape[0]):
 arr_new = np.array(arr_new)
 arr = arr_new
 
-# np.save(os.path.join(L8_NLCD_PATH,'L8_NLCD_extracted_dataset_blast.npy'), arr)
-np.save('./L8_NLCD_extracted_dataset_blast.npy', arr)
+np.save('./L8_NLCD_extracted_dataset.npy', arr)
 
 # # Visualization
 
