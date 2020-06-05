@@ -170,42 +170,47 @@ print ("Time elapsed: {} s".format(t_end - t_start))
 
 def download_and_stack_product(row_bulk_frame):
     '''   Download and stack Landsat8 bands   '''
-    # Print some the product ID
-    print('\n', 'Downloading L8 data:', row_bulk_frame.productId)
-    # print(' Checking content: ', '\n')
 
-    # Request the html text of the download_url from the amazon server. 
-    # download_url example: https://landsat-pds.s3.amazonaws.com/c1/L8/139/045/LC08_L1TP_139045_20170304_20170316_01_T1/index.html
-    response = requests.get(row_bulk_frame.download_url)
 
-    # If the response status code is fine (200)
-    if response.status_code == 200:
 
-        # Import the html to beautiful soup
-        html = BeautifulSoup(response.content, 'html.parser')
+    entity_dir = os.path.join(LANDSAT_PATH, row_bulk_frame.productId)
+    # if this dir exists, assume data are downloaded
+    if not os.path.exists(entity_dir):
+        # Print some the product ID
+        print('\n', 'Downloading L8 data:', row_bulk_frame.productId)
+        # print(' Checking content: ', '\n')
 
-        # Create the dir where we will put this image files.
-        entity_dir = os.path.join(LANDSAT_PATH, row_bulk_frame.productId)
-        os.makedirs(entity_dir, exist_ok=True)
+        # Request the html text of the download_url from the amazon server. 
+        # download_url example: https://landsat-pds.s3.amazonaws.com/c1/L8/139/045/LC08_L1TP_139045_20170304_20170316_01_T1/index.html
+        response = requests.get(row_bulk_frame.download_url)
 
-        # Second loop: for each band of this image that we find using the html <li> tag
-        for li in html.find_all('li'):
+        # If the response status code is fine (200)
+        if response.status_code == 200:
 
-            # Get the href tag
-            file = li.find_next('a').get('href')
+            # Import the html to beautiful soup
+            html = BeautifulSoup(response.content, 'html.parser')
 
-            # print('  Downloading: {}'.format(file))
+            # Create the dir where we will put this image files.
+            entity_dir = os.path.join(LANDSAT_PATH, row_bulk_frame.productId)
+            os.makedirs(entity_dir, exist_ok=True)
 
-            response = requests.get(row_bulk_frame.download_url.replace('index.html', file), stream=True)
+            # Second loop: for each band of this image that we find using the html <li> tag
+            for li in html.find_all('li'):
 
-            with open(os.path.join(entity_dir, file), 'wb') as output:
-                shutil.copyfileobj(response.raw, output)
-            del response
+                # Get the href tag
+                file = li.find_next('a').get('href')
+
+                # print('  Downloading: {}'.format(file))
+
+                response = requests.get(row_bulk_frame.download_url.replace('index.html', file), stream=True)
+
+                with open(os.path.join(entity_dir, file), 'wb') as output:
+                    shutil.copyfileobj(response.raw, output)
+                del response
 
     # Stack bands 1-7,9
 
     # Obtain the list of bands 1-7,9
-    entity_dir = os.path.join(LANDSAT_PATH, row_bulk_frame.productId)     
     landsat_bands = glob(os.path.join(entity_dir, '*B[0-7,9].TIF'))       
     landsat_bands.sort()
 

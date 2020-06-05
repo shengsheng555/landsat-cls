@@ -39,8 +39,7 @@ conv = ConvertToWRS(shapefile='./WRS2_descending/WRS2_descending.shp')
 # usage
 # conv.get_wrs(25.411914, -80.496381)  # conv.get_wrs(lat, lon)  
 
-from data_processing import cal_path_row, form_bulk, download_and_stack_product, 
-                            crop_rectangle, stack_rasters, tif_to_np
+from data_processing import cal_path_row, form_bulk, download_and_stack_product, crop_rectangle, stack_rasters, tif_to_np
 
 bulk_list = []
 bulklist = form_bulk(bulk_list, sites, s3_scenes)  
