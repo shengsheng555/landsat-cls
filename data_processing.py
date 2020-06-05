@@ -15,6 +15,9 @@ import zipfile
 import requests
 from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
+from util import cal_path_row, form_bulk, download_and_stack_product, crop_rectangle, stack_rasters, tif_to_np
+
+
 
 """Download data"""
 
@@ -106,57 +109,11 @@ t_start = time.time()
 s3_scenes = pd.read_csv('http://landsat-pds.s3.amazonaws.com/c1/L8/scene_list.gz', compression='gzip')
 
 # conversion function: LatLon to PathRow 
-from get_wrs import ConvertToWRS
-conv = ConvertToWRS(shapefile='./WRS2_descending/WRS2_descending.shp')
-# usage
-# conv.get_wrs(25.411914, -80.496381)  # conv.get_wrs(lat, lon)  
-
-
-def cal_path_row(site):
-    '''Calculate Path/Row for each site'''
-    path_row = conv.get_wrs(site['Latitude'], site['Longitude'])[0]  #conv.get_wrs(lat, lon)  
-    site['path'] = path_row['path']
-    site['row'] = path_row['row']
-    return site
-
+# from get_wrs import ConvertToWRS
 sites = sites.apply(lambda r : cal_path_row(r), axis=1)
 
 
 # Form a bulk of L8 products to download
-
-def form_bulk(bulk_list, sites, s3_scenes):  
-
-    # Iterate over sites to select a bulk of scenes
-    for index, site in sites.iterrows():
-
-        # check if the site is covered in previous scenes
-        covered = False
-        for scene in bulk_list:
-            if (scene.path == site.path and scene.row == site.row):              
-                sites.loc[index, 'productId'] = scene.productId            
-                covered = True  
-                
-        if not covered:
-
-            # Filter the Landsat S3 table for images matching path/row, cloudcover and processing state.
-            scenes = s3_scenes[(s3_scenes.path == site.path) & (s3_scenes.row == site.row) & 
-                              (s3_scenes.cloudCover <= 5) & 
-                              (~s3_scenes.productId.str.contains('_T2')) &
-                              (~s3_scenes.productId.str.contains('_RT')) &
-                              (s3_scenes.acquisitionDate.str.contains('2016-'))]
-            # print(' Found {} images\n'.format(len(scenes)))
-
-            # If any scene exists, select the one that have the minimum cloudCover.
-            if len(scenes):
-                scene = scenes.sort_values('cloudCover').iloc[0]        
-                sites.loc[index, 'productId'] = scene.productId 
-
-                # Add the selected scene to the bulk download list.
-                bulk_list.append(scene)      
-            else:
-                print('cannot find a scene for the site ID={}'.format(site.ID))  
-    return bulk_list              
-
 bulk_list = []
 
 bulklist = form_bulk(bulk_list, sites, s3_scenes)  
@@ -167,137 +124,8 @@ bulk_frame.head()
 
 t_end = time.time()
 print ("Time elapsed: {} s".format(t_end - t_start))
-
-def download_and_stack_product(row_bulk_frame):
-    '''   Download and stack Landsat8 bands   '''
-
-
-
-    entity_dir = os.path.join(LANDSAT_PATH, row_bulk_frame.productId)
-    # if this dir exists, assume data are downloaded
-    if not os.path.exists(entity_dir):
-        # Print some the product ID
-        print('\n', 'Downloading L8 data:', row_bulk_frame.productId)
-        # print(' Checking content: ', '\n')
-
-        # Request the html text of the download_url from the amazon server. 
-        # download_url example: https://landsat-pds.s3.amazonaws.com/c1/L8/139/045/LC08_L1TP_139045_20170304_20170316_01_T1/index.html
-        response = requests.get(row_bulk_frame.download_url)
-
-        # If the response status code is fine (200)
-        if response.status_code == 200:
-
-            # Import the html to beautiful soup
-            html = BeautifulSoup(response.content, 'html.parser')
-
-            # Create the dir where we will put this image files.
-            entity_dir = os.path.join(LANDSAT_PATH, row_bulk_frame.productId)
-            os.makedirs(entity_dir, exist_ok=True)
-
-            # Second loop: for each band of this image that we find using the html <li> tag
-            for li in html.find_all('li'):
-
-                # Get the href tag
-                file = li.find_next('a').get('href')
-
-                # print('  Downloading: {}'.format(file))
-
-                response = requests.get(row_bulk_frame.download_url.replace('index.html', file), stream=True)
-
-                with open(os.path.join(entity_dir, file), 'wb') as output:
-                    shutil.copyfileobj(response.raw, output)
-                del response
-
-    # Stack bands 1-7,9
-
-    # Obtain the list of bands 1-7,9
-    landsat_bands = glob(os.path.join(entity_dir, '*B[0-7,9].TIF'))       
-    landsat_bands.sort()
-
-    # Read metadata of first file
-    with rio.open(landsat_bands[0]) as src0:
-        meta = src0.meta
-
-    # Update meta to reflect the number of layers
-    meta.update(count = len(landsat_bands))
-
-    # Read each layer and write it to stack
-    stackfile = os.path.join(entity_dir, row_bulk_frame.productId+'_Stack.TIF')
-    # print('Stacking L8 bands: {}'.format(row_bulk_frame.productId))
-    with rio.open(stackfile, 'w', **meta) as dst:
-        for id, layer in enumerate(landsat_bands, start=1):
-            with rio.open(layer) as src1:
-                dst.write_band(id, src1.read(1))
-
-    # Reprojecting
-    # print('Reprojecting...')
-    reproject_ras(inpath = stackfile, 
-                  outpath = stackfile, 
-                  new_crs = 'EPSG:4326')      
-    
+   
           
-
-
-def crop_rectangle(lat, lon, image_width, image_height, res, in_file, out_file = './out.TIF'):
-    '''crop a rectangle around a point in Lat/Lon CRS'''
-
-    with rio.open(in_file) as src:
-
-        # CRS transformation
-        src_crs = rio.crs.CRS.from_epsg(4326) # latlon crs
-        dst_crs = src.crs # current crs
-        xs = [lon] 
-        ys = [lat] 
-        coor_transformed = warp.transform(src_crs, dst_crs, xs, ys, zs=None)
-        coor = [coor_transformed[0][0], coor_transformed[1][0]]
-        # print('coor: ', coor )
-
-        # Returns the (row, col) index of the pixel containing (x, y) given a coordinate reference system
-        py, px = src.index(coor[0], coor[1])
-
-        # Build window with right size
-        p_width = image_width//res
-        p_height = image_height//res        
-        window = rio.windows.Window(px - p_width//2, py - p_height//2, p_width, p_height)
-        # print('window: ', window)
-
-        # Read the data in the window
-        clip = src.read(window=window)
-        # print('clip: ', clip)
-
-        # write a new file
-        meta = src.meta
-        meta['width'], meta['height'] = p_width, p_height
-        meta['transform'] = rio.windows.transform(window, src.transform)
-
-        with rio.open(out_file, 'w', **meta) as dst:
-            dst.write(clip)                
-
-def stack_rasters(raster_list, outfile):    
-
-    # Read metadata of a certain file
-    with rio.open(raster_list[0]) as src0:
-        meta = src0.meta
-
-    # Update meta to reflect the number of layers
-    num_layers = 0
-    for f in raster_list:
-        with rio.open(f) as src:
-            num_layers += src.count
-    meta.update(count = num_layers)
-
-    # Read each layer and write it to stack
-    # print('  Stacking site_ID: {}'.format(site.ID))
-    with rio.open(outfile.format(site.ID), 'w', **meta) as dst:
-        stack_band_offset = 0
-        for id, f in enumerate(raster_list, start=1):
-            with rio.open(f) as src:
-                for band_f in range(1, src.count+1):
-                    # Cast dtype, matching L8
-                    band_to_write = src.read(band_f).astype(np.uint16)
-                    dst.write_band(stack_band_offset+band_f, band_to_write)    
-                stack_band_offset += src.count
-
 t_start = time.time()
 
 # For each productID
@@ -333,11 +161,7 @@ t_end = time.time()
 print ("Time elapsed: {} s".format(t_end - t_start))
 
 L8_NLCD_file = os.path.join(L8_NLCD_PATH,'L8_NLCD_Site_ID_{}_LARGE.TIF')
-
-def tif_to_np(tif_file):
-    with rio.open(tif_file) as src:
-        return src.read() 
-        
+       
 # dataset is a 4d np-array: (sample_index, band, x-coor, y-coor)
 dataset = np.array([tif_to_np(L8_NLCD_file.format(site.ID)) for i, site in sites.iterrows()])
 
