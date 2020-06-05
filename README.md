@@ -75,7 +75,7 @@ The script loads the pretrained model from:
 ./pretrained.hdf5
 ```
 
-The sites, for classification are given in: 
+The sites for classification are given in: 
 
 ```bash
 ./sites_classify.csv
@@ -89,6 +89,7 @@ The output array contains class labels:
 ./arr_cls.npy 
 ```
 
+As the model is patch-based, the boundary pixels are unclassified. One can preset the size of image to classify a larger area.
 
 
 ### License
