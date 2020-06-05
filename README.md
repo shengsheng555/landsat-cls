@@ -11,6 +11,8 @@ Python >=3.5
 
 Tensorflow >=2.0
 
+[GDAL](https://gdal.org/)
+
 [Rasterio](https://github.com/mapbox/rasterio/)
 
 [Shapely](https://github.com/Toblerity/Shapely/)
