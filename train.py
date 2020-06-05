@@ -170,15 +170,8 @@ y_valid_categ = tf.keras.utils.to_categorical(y_valid, num_classes=n_classes)
 
 inputShape = (patch_size, patch_size, 8)
 
-with strategy.scope():
+def patch_cnn():
     model = Sequential()
-
-    l1 = tf.keras.regularizers.l1(0)
-    dropout_rate = 0.1
-    model = Sequential()
-
-    l1 = tf.keras.regularizers.l1(0)
-    dropout_rate = 0.1
     model.add(tf.keras.layers.BatchNormalization(input_shape=inputShape))
     model.add(Conv2D(64,kernel_size=(3, 3), strides=(1, 1), padding='same', activation='relu',
                     activity_regularizer=l1))
@@ -198,7 +191,12 @@ with strategy.scope():
     model.add(Flatten())
     model.add(Dense(3200, activation='relu'))
     model.add(Dense(n_classes, activation='softmax'))
+    return model
 
+with strategy.scope():
+    dropout_rate = 0.1
+    l1 = tf.keras.regularizers.l1(0)
+    model = patch_cnn()
     model.compile(loss=tf.keras.losses.categorical_crossentropy,
                   optimizer=Adam(lr=0.0003),
                   metrics=['accuracy'] )
