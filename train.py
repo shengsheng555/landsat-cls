@@ -97,6 +97,9 @@ def map_nlcd(arr_nlcd, mode='simple'):
 
 from sklearn.model_selection  import train_test_split
 
+arr_nlcd = arr[:,:,:,8].copy()
+arr_l8 = arr[:,:,:,:8].copy()
+
 patch_size = 15
 prep = 'patch'
 
