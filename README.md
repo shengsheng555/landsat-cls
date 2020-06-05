@@ -63,6 +63,34 @@ python train.py
 
 The script reads numpy array, generates small patches and train the CNN.
 
+### Classify sites using pretrained model
+
+```bash
+python classify.py
+```
+
+The script loads the pretrained model from:
+
+```bash
+./pretrained.hdf5
+```
+
+The sites, for classification are given in: 
+
+```bash
+./sites_classify.csv
+```
+
+Landsat-8 data are downloaded, cropped and classified.
+
+The output array contains class labels:
+
+```bash
+./arr_cls.npy 
+```
+
+
+
 ### License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
