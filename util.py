@@ -202,7 +202,7 @@ def stack_rasters(raster_list, outfile):
 
     # Read each layer and write it to stack
     # print('  Stacking site_ID: {}'.format(site.ID))
-    with rio.open(outfile.format(site.ID), 'w', **meta) as dst:
+    with rio.open(outfile, 'w', **meta) as dst:
         stack_band_offset = 0
         for id, f in enumerate(raster_list, start=1):
             with rio.open(f) as src:

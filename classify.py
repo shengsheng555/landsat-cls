@@ -39,7 +39,7 @@ s3_scenes = pd.read_csv('http://landsat-pds.s3.amazonaws.com/c1/L8/scene_list.gz
 # usage
 # conv.get_wrs(25.411914, -80.496381)  # conv.get_wrs(lat, lon)  
 
-from util import cal_path_row, form_bulk, download_and_stack_product, crop_rectangle, stack_rasters, tif_to_np
+from util import cal_path_row, form_bulk, download_and_stack_product, crop_rectangle, tif_to_np
 
 sites = sites.apply(lambda r : cal_path_row(r), axis=1)
 
