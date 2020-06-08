@@ -3,9 +3,7 @@
 # !pip install rasterio
 # !pip install shapely
 
-import os, shutil
-import sys
-import time
+import os, shutil, sys, time
 import numpy as np
 import pandas as pd
 from glob import glob

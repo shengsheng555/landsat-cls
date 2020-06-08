@@ -114,9 +114,8 @@ for n in range(N):
             arr_cls[n, x+s//2, y+s//2] = labels[i]
             i += 1
 
+# output results to a 4D numpy array
 np.save('./arr_cls.npy', arr_cls)
-
-
 
 
 

@@ -83,7 +83,7 @@ The sites for classification are given in:
 
 Landsat-8 data are downloaded, cropped and classified.
 
-The output array contains class labels:
+The class labels are stored in the output array:
 
 ```bash
 ./arr_cls.npy 

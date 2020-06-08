@@ -124,7 +124,6 @@ num_valid = x_valid.shape[0]
 
 model_id = 'exp0.34'
 
-import os, shutil
 from datetime import datetime
 import tensorflow as tf
 import tensorflow.keras as keras
@@ -133,13 +132,8 @@ from tensorflow.keras.layers import AveragePooling2D, Input, Flatten, Dropout
 from tensorflow.keras.models import load_model, Sequential
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler, ReduceLROnPlateau
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.regularizers import l2
 from tensorflow.keras import backend as K
 from tensorflow.keras.models import Model
-from tensorflow.keras.datasets import cifar10
-import matplotlib.pyplot as plt
-import numpy as np
 
 patch_size = 15
 
