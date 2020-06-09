@@ -74,7 +74,7 @@ def get_patches(arr_l8, arr_nlcd, patch_size=5, mode='reduction', sublist=False)
     targets = np.array(targets)
     return features, targets
 
-def map_nlcd(arr_nlcd, mode='simple'):
+def map_nlcd(arr3d, mode='simple'):
     for x0 in range(arr3d.shape[0]):
         for x1 in range(arr3d.shape[1]):
             for x2 in range(arr3d.shape[2]):
@@ -109,7 +109,7 @@ if prep == 'patch':
                        mode='simple',
                        sublist=False)
 else:
-    x, y = arr_l8, map_nlcd(arr_l8)
+    x, y = arr_l8, map_nlcd(arr_nlcd)
 
 # Randomly split train/valid data using sklearn
 x, x_valid, y, y_valid = train_test_split(x, y, test_size=0.1, random_state=0)
